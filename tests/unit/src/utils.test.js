@@ -229,7 +229,7 @@ test(
 		const config = {target: undefined, sourceRewriteMatch: '**', firebaseJsonPath};
 		t.throws(
 			() => parseFirebaseConfiguration(config),
-			{message: 'Error: Required "functions.source" field is missing from Firebase Configuration file.'});
+			{message: 'Error: Please add the "functions.source" field to the Firebase Configuration, or specify codebase in svelte.config.js if you are using codebases.'});
 	},
 );
 

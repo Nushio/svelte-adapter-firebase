@@ -114,7 +114,7 @@ function extractHostingConfig(firebaseConfig, sourceRewriteMatch, target) {
  * 	publicDir: string
  * }} Functions config with `public` dir
  */
-function parseFirebaseConfiguration({target, sourceRewriteMatch, firebaseJsonPath}) {
+function parseFirebaseConfiguration({target, sourceRewriteMatch, firebaseJsonPath, codebase}) {
 	const firebaseJson = path.resolve(firebaseJsonPath);
 
 	if (!existsSync(firebaseJson)) {
@@ -159,19 +159,36 @@ function parseFirebaseConfiguration({target, sourceRewriteMatch, firebaseJsonPat
 		throw new Error('Error: Cloud Function name must use only alphanumeric characters and underscores and cannot be longer than 63 characters');
 	}
 
-	// If function, ensure function root-level field is present
-	if (!firebaseConfig?.functions || !firebaseConfig.functions?.source || !isString(firebaseConfig.functions.source)) {
-		throw new Error('Error: Required "functions.source" field is missing from Firebase Configuration file.');
+	const functionsSource = findValidFunctionsSource(firebaseConfig, codebase);
+	if (!functionsSource) {
+		throw new Error('Error: Please add the "functions.source" field to the Firebase Configuration, or specify codebase in svelte.config.js if you are using codebases.');
 	}
 
 	return {
 		functions: {
 			name: rewriteConfig.function ?? rewriteConfig.run.serviceId,
-			source: path.join(path.dirname(firebaseJson), firebaseConfig.functions.source),
+			source: path.join(path.dirname(firebaseJson), functionsSource),
 			runtime: firebaseConfig.functions?.runtime,
 		},
 		publicDir: path.join(path.dirname(firebaseJson), hostingConfig.public),
 	};
+}
+
+function findValidFunctionsSource(firebaseConfig, codebase) {
+	let functionsSource = null;
+	if (firebaseConfig.functions && firebaseConfig.functions.source) {
+		functionsSource = firebaseConfig.functions.source;
+	} else if (firebaseConfig.functions?.length > 0) {
+		// Iterate through array and check if codebase is present
+		for (const sources of firebaseConfig.functions) {
+			if (sources.codebase === codebase) {
+				functionsSource = sources.source;
+				break;
+			}
+		}
+	}
+
+	return functionsSource;
 }
 
 /**

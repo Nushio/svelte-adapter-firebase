@@ -86,6 +86,7 @@ the Adapter and SvelteKit becoming incompatible. Here is a compatibility table:
 
 | Adapter Version | SvelteKit Version    |
 | --------------- | -------------------- |
+| `0.14.5`        | `1.0.0-next.538`     |
 | `0.14.4`        | `1.0.0-next.443`     |
 | `0.14.3`        | `1.0.0-next.443`     |
 | `0.14.2`        | `1.0.0-next.405`     |
